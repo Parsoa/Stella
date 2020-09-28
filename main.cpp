@@ -140,10 +140,10 @@ void ping_pong_search(rld_t *index, fastq_entry_t fqe, vector<fastq_entry_t>& so
     rldintv_t sai ;
 
     int begin = l - 1 ;
+    fm6_set_intv(index, P[begin], sai) ;
     while (begin >= 0) {
         // Backward search. Find a mismatching sequence. Stop at first mismatch.
         int bmatches = 0 ;
-        fm6_set_intv(index, P[begin], sai) ;
         DEBUG(cerr << "BS from " << int2char[P[begin]] << " (" << begin << "): " << interval2str(sai) << endl ;)
             bmatches = 0 ;
         while (sai.x[2] != 0 && begin > 0) {
@@ -163,8 +163,10 @@ void ping_pong_search(rld_t *index, fastq_entry_t fqe, vector<fastq_entry_t>& so
             int end = begin ;
         int fmatches = 0 ;
         fm6_set_intv(index, P[end], sai) ;
+	rldintv_t sai_backup;
         DEBUG(cerr << "FS from " << int2char[P[end]] << " (" << end << "): " << interval2str(sai) << endl ;)
             while(sai.x[2] != 0) {
+                sai_backup = sai;
                 end++ ;
                 fmatches++ ;
                 rldintv_t osai[6] ;
@@ -191,9 +193,11 @@ void ping_pong_search(rld_t *index, fastq_entry_t fqe, vector<fastq_entry_t>& so
             break ;
         }
         // overlapping version:
-        //begin = end - 1 ;
+	sai = sai_backup;
+	
 	// non-overlapping version:
-        --begin;
+	// --begin;
+	// fm6_set_intv(index, P[begin], sai) ;
     }
     //DEBUG(std::this_thread::sleep_for(std::chrono::seconds(2)) ;)
     delete[] seq ;
